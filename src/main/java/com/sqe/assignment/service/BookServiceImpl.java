@@ -126,6 +126,7 @@ public class BookServiceImpl implements BookService {
 			return books;
 
 		} catch (SQLException e) {
+			e.printStackTrace();
 			SQLExceptionTranslator.translateAndThrow(e);
 			return books;
 		}
