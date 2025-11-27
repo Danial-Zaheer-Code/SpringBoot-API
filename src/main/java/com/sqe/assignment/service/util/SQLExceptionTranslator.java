@@ -17,12 +17,12 @@ public class SQLExceptionTranslator {
 
 			// Unique constraint violations
 			if ("23000".equals(sqlState) || msg.contains("unique") || msg.contains("duplicate")) {
-				throw new DuplicateValueException("A book with this title already exists.");
+				throw new DuplicateValueException("A record with this unique value already exists.");
 			}
 
 			// Foreign key violations
 			if (msg.contains("foreign key") || msg.contains("fk")) {
-				throw new InvalidReferenceException("The specified member does not exist.");
+				throw new InvalidReferenceException("The specified reference does not exist.");
 			}
 
 			// Not-null violations

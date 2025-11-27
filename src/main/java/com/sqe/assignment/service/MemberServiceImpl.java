@@ -1,6 +1,8 @@
 package com.sqe.assignment.service;
 
 import com.sqe.assignment.model.Member;
+import com.sqe.assignment.service.exception.InvalidDataException;
+import com.sqe.assignment.service.util.SQLExceptionTranslator;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -18,6 +20,11 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public Member createMember(Member member) {
+		// Validate required fields
+		if (member.getEmail() == null || member.getEmail().trim().isEmpty()) {
+			throw new InvalidDataException("Email is required.");
+		}
+
 		String sql = "INSERT INTO members (name, email) VALUES (?, ?)";
 
 		try (Connection conn = dataSource.getConnection();
@@ -30,7 +37,8 @@ public class MemberServiceImpl implements MemberService {
 			return member;
 
 		} catch (SQLException e) {
-			throw new RuntimeException("Error inserting member", e);
+			SQLExceptionTranslator.translateAndThrow(e);
+			return null;
 		}
 	}
 
@@ -45,26 +53,31 @@ public class MemberServiceImpl implements MemberService {
 			stmt.setString(2, member.getEmail());
 			stmt.setString(3, email);
 
-			stmt.executeUpdate();
+			int rows = stmt.executeUpdate();
+
+			if (rows == 0) return null;
+
 			return member;
 
 		} catch (SQLException e) {
-			throw new RuntimeException("Error updating member", e);
+			SQLExceptionTranslator.translateAndThrow(e);
+			return null;
 		}
 	}
 
 	@Override
-	public void deleteMember(String email) {
+	public boolean deleteMember(String email) {
 		String sql = "DELETE FROM members WHERE email = ?";
 
 		try (Connection conn = dataSource.getConnection();
 			 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
 			stmt.setString(1, email);
-			stmt.executeUpdate();
+			return stmt.executeUpdate() > 0;
 
 		} catch (SQLException e) {
-			throw new RuntimeException("Error deleting member", e);
+			SQLExceptionTranslator.translateAndThrow(e);
+			return false;
 		}
 	}
 
@@ -88,7 +101,8 @@ public class MemberServiceImpl implements MemberService {
 			return null;
 
 		} catch (SQLException e) {
-			throw new RuntimeException("Error fetching member by email", e);
+			SQLExceptionTranslator.translateAndThrow(e);
+			return null;
 		}
 	}
 
@@ -112,7 +126,8 @@ public class MemberServiceImpl implements MemberService {
 			return members;
 
 		} catch (SQLException e) {
-			throw new RuntimeException("Error fetching all members", e);
+			SQLExceptionTranslator.translateAndThrow(e);
+			return members;
 		}
 	}
 }

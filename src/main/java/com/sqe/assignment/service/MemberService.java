@@ -10,7 +10,7 @@ public interface MemberService {
 
 	Member updateMember(String email, Member member);
 
-	void deleteMember(String email);
+	boolean deleteMember(String email);
 
 	Member getMemberByEmail(String email);
 

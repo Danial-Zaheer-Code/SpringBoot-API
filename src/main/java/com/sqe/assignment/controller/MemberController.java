@@ -6,6 +6,7 @@ import com.sqe.assignment.service.MemberService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,27 +17,43 @@ public class MemberController {
 	private MemberService memberService;
 
 	@PostMapping
-	public Member createMember(@RequestBody Member member) {
-		return memberService.createMember(member);
+	public ResponseEntity<Member> createMember(@RequestBody Member member) {
+		Member created = memberService.createMember(member);
+		return ResponseEntity.ok(created);
 	}
 
-	// Update member by email
-	public Member updateMember(@PathVariable String email, @RequestBody Member member) {
-		return memberService.updateMember(email, member);
+	@PutMapping("/{email}")
+	public ResponseEntity<Member> updateMember(@PathVariable String email, @RequestBody Member member) {
+		Member updated = memberService.updateMember(email, member);
+
+		if (updated == null)
+			return ResponseEntity.notFound().build();
+
+		return ResponseEntity.ok(updated);
 	}
 
 	@DeleteMapping("/{email}")
-	public void deleteMember(@PathVariable String email) {
-		memberService.deleteMember(email);
+	public ResponseEntity<Void> deleteMember(@PathVariable String email) {
+		boolean deleted = memberService.deleteMember(email);
+
+		if (!deleted)
+			return ResponseEntity.notFound().build();
+
+		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/{email}")
-	public Member getMember(@PathVariable String email) {
-		return memberService.getMemberByEmail(email);
+	public ResponseEntity<Member> getMember(@PathVariable String email) {
+		Member member = memberService.getMemberByEmail(email);
+
+		if (member == null)
+			return ResponseEntity.notFound().build();
+
+		return ResponseEntity.ok(member);
 	}
 
 	@GetMapping
-	public List<Member> getAllMembers() {
-		return memberService.getAllMembers();
+	public ResponseEntity<List<Member>> getAllMembers() {
+		return ResponseEntity.ok(memberService.getAllMembers());
 	}
 }
